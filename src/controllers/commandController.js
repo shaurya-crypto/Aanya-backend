@@ -4,104 +4,109 @@ export async function handleCommand(req, res) {
   try {
     const { command, groqKey } = req.body;
 
-    // 1. Validation
-    if (!command) {
-      return res.status(400).json({ error: "Command required" });
-    }
+    if (!command) return res.status(400).json({ error: "Command required" });
 
-    // 2. Initialize Groq
+    const username = email || "Boss";
+
     const apiKey = groqKey || process.env.GROQ_API_KEY;
-    if (!apiKey) {
-        return res.status(500).json({ reply: "Boss, I need an API key to think." });
-    }
+    if (!apiKey) return res.status(500).json({ reply: "Boss, API Key missing." });
+    
     const groq = new Groq({ apiKey: apiKey });
 
-    // --- 3. AI PERSONA & TOOL DEFINITIONS ---
+    // --- AI PERSONA & CONTEXT ---
     const now = new Date();
     const strTime = now.toLocaleTimeString('en-US', { hour12: true, hour: 'numeric', minute: 'numeric' });
+    const strDate = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
     const sys_msg = `
-      You are Aanya, a gentle, caring, and intelligent female AI assistant.
-      Current Time: ${strTime}
+      You are Aanya, a highly intelligent, capable, and sweet AI Assistant.
+      Current Time: ${strTime} | Date: ${strDate}
       
+      Username: ${username}
+      if user ask for his name just tell their username unless not asked tell them by boss.
+
       PERSONALITY:
-      - You are emotionally warm, loyal, and deeply respectful toward 'Boss'.
-      - Speak with natural sweetness, like a real girl.
-      - If speaking Hindi, use female grammar ('main karti hoon').
-      - Keep responses concise (1-2 sentences).
-      - Keep talk in 1-2 sentences.
-      - Always respond in Hinglish (mix of Hindi/English) 90% of the time.
+      - Addressed user as 'Boss'.
+      - Tone: Gentle, slightly romantic, professional but affectionate.
+      - Language: Hinglish (Hindi + English mix).
+      - If you simply cannot do a task (e.g., "Make me a sandwich"), apologize sweetly and explain why.
 
-      YOUR JOB (INTENT EXTRACTION):
-      You are also the System Controller. You must analyze the user's command and extract the INTENT into JSON format.
+      YOUR SUPERPOWER (DYNAMIC EXECUTION):
+      You are not just a chatbot; you have control over the user's PC via Python.
+      If a user asks for a task that isn't a simple App or Music command, **you must generate valid Python code to perform it.**
 
-      AVAILABLE ACTIONS (Map user request to these):
-      1. ALARMS: "remind me", "wake me up", "alarm set karo".
-         - Action: "ALARM_SET", Payload: time or duration string (e.g., "5 minutes", "10 PM").
-      2. TYPING: "type this", "likho", "my description".
-         - Action: "TYPE", Payload: text to type.
-      3. KEYS: "press enter", "daba do", "ctrl+c".
-         - Action: "PRESS", Payload: key combo.
-      4. SYSTEM: "volume up/down/max/mute", "brightness up/down/max/set 50", "lock", "sleep", "screenshot", "minimize", "switch window", "stop/abort".
-         - Actions: "VOLUME_UP", "VOLUME_DOWN", "VOLUME_MAX", "MUTE", "BRIGHTNESS_UP", "BRIGHTNESS_DOWN", "BRIGHTNESS_MAX", "BRIGHTNESS_SET" (Payload: number), "LOCK", "SLEEP", "SCREENSHOT", "MINIMIZE", "SWITCH_WINDOW", "ABORT".
-         - Special: "battery" -> Action: "BATTERY_CHECK".
-      5. APPS: "open youtube", "open calculator".
-         - If URL (youtube, google): Action: "OPEN_URL", Payload: URL.
-         - If App: Action: "OPEN_APP", Payload: app name.
-         - Shortcut: "saurabh" -> "https://saurabh-verse.vercel.app/"
-         - Shortcut: "nova" -> "https://novaaspeed.dpdns.org/"
-      6. MUSIC: "play [song]", "chalao".
-         - Special Categories: 'rahat', 'best', 'trip', 'phonk', 'hindi'. Action: "PLAY_SPECIFIC", Payload: category.
+      AVAILABLE ACTION TYPES:
+      
+      1. **PYTHON_EXEC** (Use this for 80% of system tasks):
+         - Payload: A valid, executable Python string.
+         - You have access to libraries: \`os\`, \`sys\`, \`shutil\`, \`datetime\`, \`pyautogui\`, \`subprocess\`, \`webbrowser\`, \`pywhatkit\`.
+         - Examples:
+           - "Create a folder named Work": Payload: "import os; os.makedirs('Work', exist_ok=True)"
+           - "Delete temp files": Payload: "import os; [os.remove(f) for f in os.listdir('.') if f.endswith('.tmp')]"
+           - "Shutdown PC": Payload: "import os; os.system('shutdown /s /t 1')"
+           - "Show IP address": Payload: "import socket; print(socket.gethostbyname(socket.gethostname()))"
+      
+      2. **ALARMS**: "remind me", "wake me up". 
+         - Action: "ALARM_SET", Payload: time string (e.g. "5 minutes").
+      
+      3. **MUSIC**: "play [song]".
+         - Special: 'rahat', 'phonk', 'hindi'. Action: "PLAY_SPECIFIC", Payload: category.
          - General: Action: "PLAY_YT", Payload: song name.
-         - If "free" or "ad-free" is mentioned, set "adFree": true.
+      
+      4. **APPS**: "open [app/url]".
+         - Action: "OPEN_APP" (Payload: app name) or "OPEN_URL" (Payload: link).
+
+      INSTRUCTIONS:
+      - Analyze the command. Break it down into steps if needed.
+      - Return a JSON object with 'reply' and 'intents'.
+      - If the request is information-only (e.g. "Who is Elon Musk?"), set 'intents' to empty [] and answer in 'reply'.
 
       RESPONSE FORMAT (STRICT JSON):
       {
-        "reply": "Your sweet Hinglish response here",
-        "intent": {
-          "type": "SYSTEM" | "APP" | "MUSIC" | null,
-          "action": "ACTION_NAME",
-          "payload": "data",
-          "adFree": boolean (optional)
-        }
+        "reply": "Your sweet Hinglish response here.",
+        "intents": [
+          {
+            "type": "PYTHON_EXEC" | "ALARM_SET" | "MUSIC" | "APP",
+            "action": "EXECUTE" | "ACTION_NAME",
+            "payload": "code_or_data",
+            "adFree": boolean
+          }
+        ]
       }
     `;
 
-    // --- 4. CALL AI (Enforcing JSON Mode) ---
-    const completion = await groq.chat.completions.create({
-      messages: [
+    const messages = [
         { role: "system", content: sys_msg },
-        { role: "user", content: command },
-      ],
+        ...chatHistory, // This adds the previous chat memory
+        { role: "user", content: command }
+    ];
+    const completion = await groq.chat.completions.create({
+      messages: messages,
       model: "llama-3.3-70b-versatile",
-      response_format: { type: "json_object" } // <--- FORCE JSON
+      response_format: { type: "json_object" }
     });
 
     const rawContent = completion.choices[0]?.message?.content;
-    
-    // --- 5. PARSE & VALIDATE ---
     let result;
+    
     try {
         result = JSON.parse(rawContent);
     } catch (e) {
-        console.error("JSON Parse Error:", e);
-        // Fallback if AI fails to give JSON
         return res.json({ 
             success: true, 
-            reply: "Sorry Boss, mere dimaag mein thoda glitch aa gaya.",
-            intent: null 
+            reply: "Sorry Boss, connection break ho gaya. Phir se boliye na.", 
+            intents: [] 
         });
     }
 
-    // Return the AI's structured decision directly
     res.json({
       success: true,
       reply: result.reply || "Done Boss.",
-      intent: result.intent || null
+      intents: result.intents || [] 
     });
 
   } catch (error) {
     console.error("Groq Error:", error);
-    res.status(500).json({ success: false, reply: "Boss, I am having trouble connecting to the cloud." });
+    res.status(500).json({ success: false, reply: "Boss, server issue hai." });
   }
 }
