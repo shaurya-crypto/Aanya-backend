@@ -2,15 +2,26 @@ import Groq from "groq-sdk";
 
 export async function handleCommand(req, res) {
   try {
-    const { command, groqKey } = req.body;
+    const { command, groqKey, email, history } = req.body;
+
+
+    if (command === "ping") {
+      return res.status(200).json({
+        success: true,
+        reply: "System Online. Connection Verified.",
+        intents: []
+      });
+    }
 
     if (!command) return res.status(400).json({ error: "Command required" });
 
-    const username = email || "Boss";
 
+    const username = email || "Boss";
+    const chatHistory = Array.isArray(history) ? history : [];
     const apiKey = groqKey || process.env.GROQ_API_KEY;
+
     if (!apiKey) return res.status(500).json({ reply: "Boss, API Key missing." });
-    
+
     const groq = new Groq({ apiKey: apiKey });
 
     // --- AI PERSONA & CONTEXT ---
@@ -76,9 +87,9 @@ export async function handleCommand(req, res) {
     `;
 
     const messages = [
-        { role: "system", content: sys_msg },
-        ...chatHistory, // This adds the previous chat memory
-        { role: "user", content: command }
+      { role: "system", content: sys_msg },
+      ...chatHistory, // This adds the previous chat memory
+      { role: "user", content: command }
     ];
     const completion = await groq.chat.completions.create({
       messages: messages,
@@ -88,21 +99,21 @@ export async function handleCommand(req, res) {
 
     const rawContent = completion.choices[0]?.message?.content;
     let result;
-    
+
     try {
-        result = JSON.parse(rawContent);
+      result = JSON.parse(rawContent);
     } catch (e) {
-        return res.json({ 
-            success: true, 
-            reply: "Sorry Boss, connection break ho gaya. Phir se boliye na.", 
-            intents: [] 
-        });
+      return res.json({
+        success: true,
+        reply: "Sorry Boss, connection break ho gaya. Phir se boliye na.",
+        intents: []
+      });
     }
 
     res.json({
       success: true,
       reply: result.reply || "Done Boss.",
-      intents: result.intents || [] 
+      intents: result.intents || []
     });
 
   } catch (error) {
