@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 
 const apiKeySchema = new mongoose.Schema({
-  key: String,
   key: { type: String, required: true, unique: true },
   userId: mongoose.Schema.Types.ObjectId,
   active: { type: Boolean, default: true },
@@ -13,3 +12,4 @@ const apiKeySchema = new mongoose.Schema({
 });
 
 export default mongoose.model("ApiKey", apiKeySchema);
+
