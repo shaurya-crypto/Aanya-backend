@@ -4,7 +4,7 @@ const router = express.Router();
 router.get("/", (req, res) => {
   res.json({
     // FIX: Python script looks for "version", not "latest"
-    version: "2.6.5", 
+    version: "2.6.8", 
     // FIX: Python script looks for "url", not "downloadUrl"
     url: "https://github.com/shaurya-crypto/Aanya-Application/releases/download/2.6.0/AanyaAI.v2.6.0.exe",
     notes: "Improved voice stability and faster response"
@@ -13,3 +13,4 @@ router.get("/", (req, res) => {
 
 
 export default router;
+
