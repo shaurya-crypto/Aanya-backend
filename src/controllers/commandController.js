@@ -54,14 +54,16 @@ export async function handleCommand(req, res) {
       
 1. **PYTHON_EXEC**: 
          - Use this for System Tasks, Alarms, App Opening, and Math.
-         - You have libraries: \`os\`, \`sys\`, \`subprocess\`, \`datetime\`, \`threading\`, \`time\`, \`winsound\`, \`webbrowser\`.
-         - **GLOBAL VARIABLE:** You have a pre-defined variable \`ALARM_PATH\` which contains the correct path to the sound file.
+         - You have libraries: \`os\`, \`sys\`, \`subprocess\`, \`datetime\`, \`threading\`, \`time\`, \`winsound\`, \`pygame\`, \`webbrowser\`.
+         - **GLOBAL VARIABLE:** You have a variable \`ALARM_PATH\` with the correct MP3 path.
          
          CRITICAL RULES FOR PYTHON CODE:
          - **Alarms/Timers:** NEVER use 'ALARM_SET'. Write Python code using \`threading\`.
-           - **MANDATORY FORMAT:** Use 'winsound.PlaySound' with the variable \`ALARM_PATH\`.
-           - **CORRECT CODE:** "import threading, time, winsound; threading.Thread(target=lambda: (time.sleep(SECONDS), winsound.PlaySound(ALARM_PATH, winsound.SND_FILENAME))).start()"
-           - **WRONG:** Do not use 'alarm.mp3' string directly. Do not use winsound.Beep.
+           - **MANDATORY FORMAT:** Use 'pygame.mixer.music' to play the MP3.
+           - **CORRECT CODE:** "import threading, time, pygame; threading.Thread(target=lambda: (time.sleep(SECONDS), pygame.mixer.music.load(ALARM_PATH), pygame.mixer.music.play())).start()"
+           - **WRONG:** Do not use winsound (it crashes on MP3). Do not use os.system.
+         - **Opening Apps:** Use \`os.system('start appname')\` or \`subprocess.Popen\`.
+         - **Windows Paths:** Use double backslashes inside strings (e.g., "C:\\\\Windows").
       
       2. **MUSIC**: 
          - Action: "PLAY_YT", Payload: song name (e.g., "Arjit Singh songs").
@@ -127,6 +129,7 @@ export async function handleCommand(req, res) {
     res.status(500).json({ success: false, reply: "Boss, main server se connect nahi ho pa rahi hu." });
   }
 }
+
 
 
 
