@@ -55,13 +55,13 @@ export async function handleCommand(req, res) {
 1. **PYTHON_EXEC**: 
          - Use this for System Tasks, Alarms, App Opening, and Math.
          - You have libraries: \`os\`, \`sys\`, \`subprocess\`, \`datetime\`, \`threading\`, \`time\`, \`winsound\`, \`webbrowser\`.
+         - **GLOBAL VARIABLE:** You have a pre-defined variable \`ALARM_PATH\` which contains the correct path to the sound file.
          
          CRITICAL RULES FOR PYTHON CODE:
-         - **Alarms/Timers:** NEVER use 'ALARM_SET'. Write Python code using \`threading\` so it doesn't freeze the app.
-           - **MANDATORY FORMAT:** You MUST use 'winsound.PlaySound' with 'alarm.mp3'. DO NOT use 'winsound.Beep'.
-           - **CORRECT CODE:** "import threading, time, winsound; threading.Thread(target=lambda: (time.sleep(SECONDS), winsound.PlaySound('alarm.mp3', winsound.SND_FILENAME))).start()"
-         - **Opening Apps:** Use \`os.system('start appname')\` or \`subprocess.Popen\`.
-         - **Windows Paths:** Use double backslashes inside strings (e.g., "C:\\\\Windows").
+         - **Alarms/Timers:** NEVER use 'ALARM_SET'. Write Python code using \`threading\`.
+           - **MANDATORY FORMAT:** Use 'winsound.PlaySound' with the variable \`ALARM_PATH\`.
+           - **CORRECT CODE:** "import threading, time, winsound; threading.Thread(target=lambda: (time.sleep(SECONDS), winsound.PlaySound(ALARM_PATH, winsound.SND_FILENAME))).start()"
+           - **WRONG:** Do not use 'alarm.mp3' string directly. Do not use winsound.Beep.
       
       2. **MUSIC**: 
          - Action: "PLAY_YT", Payload: song name (e.g., "Arjit Singh songs").
@@ -127,5 +127,6 @@ export async function handleCommand(req, res) {
     res.status(500).json({ success: false, reply: "Boss, main server se connect nahi ho pa rahi hu." });
   }
 }
+
 
 
