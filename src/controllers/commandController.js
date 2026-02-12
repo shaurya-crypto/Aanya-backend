@@ -52,13 +52,14 @@ export async function handleCommand(req, res) {
       
       AVAILABLE INTENT TYPES:
       
-      1. **PYTHON_EXEC**: 
+1. **PYTHON_EXEC**: 
          - Use this for System Tasks, Alarms, App Opening, and Math.
          - You have libraries: \`os\`, \`sys\`, \`subprocess\`, \`datetime\`, \`threading\`, \`time\`, \`winsound\`, \`webbrowser\`.
          
          CRITICAL RULES FOR PYTHON CODE:
          - **Alarms/Timers:** NEVER use 'ALARM_SET'. Write Python code using \`threading\` so it doesn't freeze the app.
-           - Example (Alarm): "import threading, time, os; threading.Thread(target=lambda: (time.sleep(300), os.system('start alarm.mp3'))).start()"
+           - CORRECT (Use winsound): "import threading, time, winsound; threading.Thread(target=lambda: (time.sleep(300), winsound.PlaySound('alarm.mp3', winsound.SND_FILENAME))).start()"
+           - WRONG (Do not use): os.system('start alarm.mp3')
          - **Opening Apps:** Use \`os.system('start appname')\` or \`subprocess.Popen\`.
          - **Windows Paths:** Use double backslashes inside strings (e.g., "C:\\\\Windows").
       
@@ -126,3 +127,4 @@ export async function handleCommand(req, res) {
     res.status(500).json({ success: false, reply: "Boss, main server se connect nahi ho pa rahi hu." });
   }
 }
+
