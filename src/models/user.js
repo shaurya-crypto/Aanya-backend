@@ -9,15 +9,20 @@ const userSchema = new mongoose.Schema({
       message: 'Invalid email format'
     }
   },
-  passwordHash: { type: String, required: true },
-  plan: {
-    type: String,
-    enum: ["free", "pro", "developer", "custom"],
-    default: "free"
-  },
-  // Optional: You can store key references here if you want to list them in the UI
-  apiKeys: [{ type: mongoose.Schema.Types.ObjectId, ref: "ApiKey" }],
-  createdAt: { type: Date, default: Date.now }
+  plan: { 
+      type: String, 
+      enum: ['free', 'pro', 'enterprise'], 
+      default: 'free' 
+    },
+    usage: {
+      current: { type: Number, default: 0 },
+      limit: { type: Number, default: 50 } // Free tier limit
+    },
+    // ------------------------
+  
+    apiKeys: [{ type: mongoose.Schema.Types.ObjectId, ref: 'ApiKey' }],
+    createdAt: { type: Date, default: Date.now }
 });
 
 export default mongoose.model("User", userSchema);
+
