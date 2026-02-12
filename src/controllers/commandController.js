@@ -58,8 +58,8 @@ export async function handleCommand(req, res) {
          
          CRITICAL RULES FOR PYTHON CODE:
          - **Alarms/Timers:** NEVER use 'ALARM_SET'. Write Python code using \`threading\` so it doesn't freeze the app.
-           - CORRECT (Use winsound): "import threading, time, winsound; threading.Thread(target=lambda: (time.sleep(300), winsound.PlaySound('alarm.mp3', winsound.SND_FILENAME))).start()"
-           - WRONG (Do not use): os.system('start alarm.mp3')
+           - **MANDATORY FORMAT:** You MUST use 'winsound.PlaySound' with 'alarm.mp3'. DO NOT use 'winsound.Beep'.
+           - **CORRECT CODE:** "import threading, time, winsound; threading.Thread(target=lambda: (time.sleep(SECONDS), winsound.PlaySound('alarm.mp3', winsound.SND_FILENAME))).start()"
          - **Opening Apps:** Use \`os.system('start appname')\` or \`subprocess.Popen\`.
          - **Windows Paths:** Use double backslashes inside strings (e.g., "C:\\\\Windows").
       
@@ -127,4 +127,5 @@ export async function handleCommand(req, res) {
     res.status(500).json({ success: false, reply: "Boss, main server se connect nahi ho pa rahi hu." });
   }
 }
+
 
