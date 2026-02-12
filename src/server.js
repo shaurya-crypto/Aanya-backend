@@ -16,6 +16,10 @@ import authRoutes from "./routes/auth.js";
 import commandRoutes from "./routes/command.js";
 import versionRoute from "./routes/version.js";
 import userRoutes from "./routes/user.js";
+const trackAnalytics = require('./middleware/analytics');
+const authMiddleware = require('./middleware/auth'); // Your existing auth
+
+app.post('/command', authMiddleware, trackAnalytics, commandController.processCommand);
 
 
 const app = express();
