@@ -1,4 +1,4 @@
-import ApiKey from "../models/ApiKey.js";
+import ApiKey from "../models/Apikey.js";
 
 export const apiAuth = async (req, res, next) => {
   try {
@@ -25,3 +25,4 @@ export const apiAuth = async (req, res, next) => {
 };
 
 export default apiAuth;
+
