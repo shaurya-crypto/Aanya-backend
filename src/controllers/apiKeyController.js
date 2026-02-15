@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
-import ApiKey from "../models/ApiKey.js";
+import ApiKey from "../models/Apikey.js";
 import User from "../models/user.js";
 
 export const generateKey = async (req, res) => {
@@ -56,4 +56,5 @@ export const toggleKey = async (req, res) => {
     } catch (err) {
         res.status(500).json({ error: "Update failed" });
     }
+
 };
