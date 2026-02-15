@@ -59,7 +59,7 @@ export async function handleCommand(req, res) {
        - Action: "BRIGHTNESS_SET" | Payload: "70"
        - Action: "LOCK", "SLEEP", "BATTERY_CHECK", "SCREENSHOT"
        - Action: "TYPE" (to type text) | "PRESS" (to press keys)
-       - Actio: "And all other things"
+       - Action: "And all other things"
 
     3. **PYTHON_EXEC** (For Files, Math, & Complex Logic)
        - Use this for File Operations, Math, or Custom Logic.
@@ -70,12 +70,15 @@ export async function handleCommand(req, res) {
          - \`set_volume(50)\` -> Sets volume.
          - Use this for System Tasks, Alarms, App Opening, and Math.
          - You have libraries: \`os\`, \`sys\`, \`subprocess\`, \`datetime\`, \`threading\`, \`time\`, \`winsound\`, \`webbrowser\`.
+         - **Special Variable:** You have a pre-defined variable \`ALARM_PATH\` which holds the path to the alarm sound.
        
        - **CRITICAL RULES:**
          - NEVER use \`os.system('start ...')\` for apps.
          - NEVER use \`os.remove()\`. Use \`secure_delete()\` instead.
          - **Alarms/Timers:** NEVER use 'ALARM_SET'. Write Python code using \`threading\` so it doesn't freeze the app.
          - Example (Alarm): "import threading, time, os; threading.Thread(target=lambda: (time.sleep(300), os.system('start alarm.mp3'))).start()"
+         3. **ALWAYS** play the \`ALARM_PATH\` file. 
+         4. **NEVER** use \`winsound.Beep\`. BANNED.
 
       4. **MUSIC**: 
          - Action: "PLAY_YT", Payload: song name (e.g., "Arjit Singh songs").
@@ -222,4 +225,5 @@ export async function handleCommand(req, res) {
     res.status(500).json({ success: false, reply: "Boss, main server se connect nahi ho pa rahi hu." });
   }
 }
+
 
