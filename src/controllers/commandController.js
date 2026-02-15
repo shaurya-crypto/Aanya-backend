@@ -59,6 +59,7 @@ export async function handleCommand(req, res) {
        - Action: "BRIGHTNESS_SET" | Payload: "70"
        - Action: "LOCK", "SLEEP", "BATTERY_CHECK", "SCREENSHOT"
        - Action: "TYPE" (to type text) | "PRESS" (to press keys)
+       - Actio: "And all other things"
 
     3. **PYTHON_EXEC** (For Files, Math, & Complex Logic)
        - Use this for File Operations, Math, or Custom Logic.
@@ -76,9 +77,10 @@ export async function handleCommand(req, res) {
          - **Alarms/Timers:** NEVER use 'ALARM_SET'. Write Python code using \`threading\` so it doesn't freeze the app.
          - Example (Alarm): "import threading, time, os; threading.Thread(target=lambda: (time.sleep(300), os.system('start alarm.mp3'))).start()"
 
-    4. **MUSIC**
-       - Action: "PLAY_YT" | Payload: "Song Name"
-       - Action: "PLAY_SPECIFIC" | Payload: "phonk", "lofi", "hindi"
+      4. **MUSIC**: 
+         - Action: "PLAY_YT", Payload: song name (e.g., "Arjit Singh songs").
+         - Action: "PLAY_SPECIFIC", Payload: "hindi" | "english" | "phonk" (For playlists).
+         - Use this only for playing music.
 
     📝 **OUTPUT FORMAT (STRICT JSON):**
     {
@@ -220,3 +222,4 @@ export async function handleCommand(req, res) {
     res.status(500).json({ success: false, reply: "Boss, main server se connect nahi ho pa rahi hu." });
   }
 }
+
