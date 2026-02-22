@@ -25,12 +25,42 @@ const server = http.createServer(app); // 👈 3. Wrap Express app with HTTP ser
 connectDB();
 
 // --- HTTP Middleware ---
-app.use(cors({
-  origin: ["http://localhost:8080", "http://localhost:5173", "http://localhost:3000", "https://aanya-backend.onrender.com"], // Added standard React ports just in case!
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  allowedHeaders: ["Content-Type", "Authorization", "x-api-key"],
-  credentials: true
-}));
+
+// 1. Define your "VIP" main websites here
+const mainWebsites = [
+  "https://aanya-ai.vercel.app", // Your live Vercel frontend
+  "http://localhost:5173",       // Your local testing frontend
+  "http://localhost:3000"
+];
+
+// 2. Create the dynamic CORS rules
+const dynamicCorsOptions = (req, callback) => {
+  const requestOrigin = req.header('Origin');
+  let corsOptions;
+
+  if (mainWebsites.includes(requestOrigin)) {
+    // 🟢 MAIN WEBSITE RULES: Full Access
+    corsOptions = {
+      origin: true, // Reflects their exact URL to allow credentials
+      methods: ["GET", "POST", "PUT", "DELETE"],
+      allowedHeaders: ["Content-Type", "Authorization", "x-api-key"],
+      credentials: true
+    };
+  } else {
+    // 🟡 EVERYONE ELSE: Restricted Access
+    corsOptions = {
+      origin: true, // Still allows them to connect
+      methods: ["GET", "POST"], // 👈 ONLY GET and POST allowed!
+      allowedHeaders: ["Content-Type", "Authorization", "x-api-key"],
+      credentials: true
+    };
+  }
+
+  callback(null, corsOptions);
+};
+
+// 3. Apply the rules to your app
+app.use(cors(dynamicCorsOptions));
 
 app.use(express.json());
 app.use(passport.initialize());
@@ -98,4 +128,5 @@ server.listen(PORT, () => {
   };
 
   keepAlive();
+
 });
