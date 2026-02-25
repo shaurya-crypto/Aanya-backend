@@ -128,27 +128,51 @@ export async function handleCommand(req, res) {
       { role: "user", content: command }
     ];
 
-    const callGroqAPI = async (key) => {
+  // 1. Update the API caller to accept the model name dynamically
+    const callGroqAPI = async (key, modelName) => {
       const client = new Groq({ apiKey: key });
       return await client.chat.completions.create({
         messages: messages,
-        model: "llama-3.1-8b-instant",
+        model: modelName,
         temperature: 0.6,
-        response_format: { type: "json_object" } // Strictly locked to JSON
+        response_format: { type: "json_object" } 
       });
     };
 
+    // 2. Create the Auto-Switch Fallback Logic
+    const fetchWithModelFallback = async (key) => {
+      try {
+        // Step A: Try the smartest model first
+        console.log("🧠 Attempting 70B model...");
+        return await callGroqAPI(key, "llama-3.3-70b-versatile");
+      } catch (err) {
+        // Step B: If 70B fails, instantly switch to 8B
+        console.warn(`⚠️ 70B Model failed (${err.status || err.message}). Switching to 8B...`);
+        return await callGroqAPI(key, "llama-3.1-8b-instant");
+      }
+    };
+
+    // 3. Execute using the new Fallback Wrapper
     let completion;
+    
+    // Try User Key First
     if (groqKey) {
-      try { completion = await callGroqAPI(groqKey); }
-      catch (err) { console.warn("User Groq Key failed:", err.message); }
+      try { 
+        completion = await fetchWithModelFallback(groqKey); 
+      } catch (err) { 
+        console.warn("❌ User Groq Key failed entirely:", err.message); 
+      }
     }
 
+    // Fallback to System Key if User Key fails or doesn't exist
     if (!completion) {
       if (!user) return res.status(401).json({ error: "User not identified" });
+      
       if ((user.systemKeyUsage || 0) < 10) {
         try {
-          completion = await callGroqAPI(systemKey);
+          console.log(`Using System Fallback (${(user.systemKeyUsage || 0) + 1}/10)`);
+          completion = await fetchWithModelFallback(systemKey);
+          
           user.systemKeyUsage = (user.systemKeyUsage || 0) + 1;
           await user.save();
         } catch (sysErr) {
@@ -207,4 +231,5 @@ export async function handleCommand(req, res) {
     res.status(500).json({ success: false, reply: "Internal Server Error" });
   }
 }
+
 
