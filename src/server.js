@@ -24,10 +24,9 @@ const server = http.createServer(app); // 👈 3. Wrap Express app with HTTP ser
 // Initialize Database
 connectDB();
 
-// --- HTTP Middleware ---
 app.use(cors({
-  origin: ["http://localhost:8080", "http://localhost:5173", "http://localhost:3000", "https://aanya-backend.onrender.com", "https://aanyaai.dpdns.org"], // Added standard React ports just in case!
-  methods: ["GET", "POST", "PUT", "DELETE"],
+  origin: ["http://localhost:8080", "http://localhost:5173", "http://localhost:3000", "https://aanya-backend.onrender.com", "https://aanyaai.dpdns.org"], 
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // ✅ Added OPTIONS
   allowedHeaders: ["Content-Type", "Authorization", "x-api-key"],
   credentials: true
 }));
@@ -100,4 +99,5 @@ server.listen(PORT, () => {
   keepAlive();
 
 });
+
 
