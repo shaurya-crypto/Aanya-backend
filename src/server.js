@@ -26,7 +26,7 @@ connectDB();
 
 // --- HTTP Middleware ---
 app.use(cors({
-  origin: ["http://localhost:8080", "http://localhost:5173", "http://localhost:3000", "https://aanya-backend.onrender.com", "aanya-ai.vervel.app", "https://aanyaai.dpdns.org"], // Added standard React ports just in case!
+  origin: ["http://localhost:8080", "http://localhost:5173", "http://localhost:3000", "https://aanya-backend.onrender.com", "https://aanya-ai.vercel.app", "https://aanyaai.dpdns.org"], // Added standard React ports just in case!
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization", "x-api-key"],
   credentials: true
@@ -100,4 +100,5 @@ server.listen(PORT, () => {
   keepAlive();
 
 });
+
 
