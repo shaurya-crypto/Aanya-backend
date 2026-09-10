@@ -220,7 +220,7 @@ const messages = [
       const client = new Groq({ apiKey: key });
       return await client.chat.completions.create({
         messages: messages,
-        model: "openai/gpt-oss-20",
+        model: "openai/gpt-oss-20b",
         temperature: 0.6,
         response_format: { type: "json_object" } // Strictly locked to JSON
       });
